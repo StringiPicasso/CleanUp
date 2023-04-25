@@ -29,8 +29,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4552471982052134227}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: -0.2, y: -0.14184397, z: -0.14184397}
+  m_LocalPosition: {x: 0, y: 0.0721, z: 0}
+  m_LocalScale: {x: 0.21, y: 0.14893617, z: 0.14893617}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}
@@ -112,7 +112,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _valueOfRewardPoints: 1
-  _material: {fileID: 4552471982052134225}
 --- !u!114 &-1293950661783732521
 MonoBehaviour:
   m_ObjectHideFlags: 0
