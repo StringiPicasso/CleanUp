@@ -12,29 +12,44 @@ public abstract class VacuumCleaner : MonoBehaviour
     [SerializeField] protected int _rewardValue;
     [SerializeField] protected int _maxExperience;
     [SerializeField] protected ExperiencePointsText _notificationNewReward;
-    [SerializeField] protected Rating _ratingg;
-    [SerializeField] private TMP_Text _namePlayerText;
+    [SerializeField] protected TMP_Text _namePlayerText;
+    [SerializeField] protected AnimationEdit _sckaleScript;
 
-
+    protected int _lostPoint;
+    protected Coroutine _activeCoroutinePuddle;
     protected Animator _animator;
-    private Vector3 _numberNewLocalScaleAdded=new Vector3(0.3f,0.3f,0.3f);
-
-    protected int _minExperience=0;
+    protected int _minExperience = 0;
     protected int _level = 1;
     protected int _totalExperience;
     protected int _receivedReward;
-    protected int _numberNewMaxExperienceAdded = 5;
+    protected int _numberNewMaxExperienceAdded = 20;
     protected int _totalNumberPointsExperience;
 
     public int Level => _level;
-    public string Name => _namePlayerText.text;
-    public int TotalNumberPointExpirience=>_totalNumberPointsExperience;
+    public int Reward => _rewardValue;
+    public string NamePlayer => _namePlayerText.text;
+    public int TotalNumberPointExpirience => _totalNumberPointsExperience;
 
     public abstract void ChangeExerience(int reward);
+    public abstract void LostExerience(int lostPoint);
 
-    private void Start()
+    private void Awake()
     {
         _animator = GetComponent<Animator>();
+        _lostPoint = 0;
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.gameObject.TryGetComponent<Puddle>(out Puddle puddle))
+        {
+            if (_activeCoroutinePuddle != null)
+            {
+                StopCoroutine(_activeCoroutinePuddle);
+            }
+
+            _lostPoint = 0;
+        }
     }
 
     public void TryGetReward(int reward)
@@ -44,11 +59,35 @@ public abstract class VacuumCleaner : MonoBehaviour
         ChangeTotalExperience(_receivedReward);
     }
 
+    public void TryLostReward(int lostPoint)
+    {
+        _totalNumberPointsExperience -= lostPoint;
+        _receivedReward = lostPoint;
+        LostTotalEXP(_receivedReward);
+    }
+
+    private void LostTotalEXP(int lostPoint)
+    {
+        _totalExperience -= lostPoint;
+        TakeLawLevel();
+    }
+
     private void ChangeTotalExperience(int reward)
     {
         _totalExperience += reward;
-        _animator.SetTrigger(PickUpObject);
+        _animator.Play(PickUpObject);
         TakeNewLevel();
+    }
+
+    private void TakeLawLevel()
+    {
+        if (_totalExperience < _minExperience)
+        {
+            TakeLowLevelText();
+            _maxExperience -= _numberNewMaxExperienceAdded;
+            _level--;
+            _sckaleScript.TakeLooseObjectSize();
+        }
     }
 
     private void TakeNewLevel()
@@ -56,11 +95,17 @@ public abstract class VacuumCleaner : MonoBehaviour
         if (_totalExperience >= _maxExperience)
         {
             TakeNewLevelText();
-            TakeNewObjectSize();
+            _sckaleScript.TakeNewObjectSize();
             _totalExperience = _minExperience;
             _maxExperience += _numberNewMaxExperienceAdded;
             _level++;
         }
+    }
+
+    private void TakeLowLevelText()
+    {
+        _notificationNewReward.gameObject.SetActive(true);
+        _notificationNewReward.NotificationLowLevel();
     }
 
     private void TakeNewLevelText()
@@ -69,11 +114,13 @@ public abstract class VacuumCleaner : MonoBehaviour
         _notificationNewReward.NotificationNextLevel();
     }
 
-    private void TakeNewObjectSize()
+    protected IEnumerator RaseLostPoint()
     {
-        GetComponent<Animator>().enabled = false;
-        transform.localScale += _numberNewLocalScaleAdded;
-        _animator.enabled = true;
-    }
+        while (true)
+        {
+            _lostPoint++;
 
+            yield return new WaitForSeconds(0.2f);
+        }
+    }
 }

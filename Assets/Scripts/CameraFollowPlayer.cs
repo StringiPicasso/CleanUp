@@ -5,6 +5,7 @@ using UnityEngine;
 public class CameraFollowPlayer : MonoBehaviour
 {
     [SerializeField] private Player _player;
+    [SerializeField] private float _countMoveCameraAdidd;
     
     private float _distantY;
     private float _distantZ;

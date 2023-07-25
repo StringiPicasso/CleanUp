@@ -11,16 +11,14 @@ public class SpawnTrash : MonoBehaviour
     [SerializeField] private int _maximumRandomNumber;
 
     private Vector3 _randomSpawnPosition;
+    private Vector3 _originalPOint;
     private float _currentTimeSpawn;
     private int _randomIndex;
-    private Trash _target;
-
-    public Trash TargetTrash => _target;
-
-    public event UnityAction<Trash> TrashCreated;
+    private bool isPlaceFree;
 
     private void Start()
     {
+        _originalPOint = transform.position;
         _currentTimeSpawn = _timeAfterLastSpawn;
     }
 
@@ -35,12 +33,34 @@ public class SpawnTrash : MonoBehaviour
         _currentTimeSpawn -= Time.deltaTime;
     }
 
+    private bool CheckFreeePOsition(Vector3 position)
+    {
+        Collider[] hitColliders = Physics.OverlapBox(position, _originalPOint);
+
+        if (hitColliders.Length > 0)
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+    }
+
     private void InstantiateTrash()
     {
         _randomIndex = Random.Range(0, _trash.Length);
-        _randomSpawnPosition = new Vector3(Random.Range(-_miminumRandomNumber, _maximumRandomNumber), _trash[_randomIndex].transform.position.y, Random.Range(-_miminumRandomNumber, _maximumRandomNumber));
+        _randomSpawnPosition = new Vector3(Random.Range(-20, 20), _trash[_randomIndex].transform.position.y, Random.Range(-20, 30));
 
-        _target=Instantiate(_trash[_randomIndex], _randomSpawnPosition, Quaternion.identity);
-        TrashCreated?.Invoke(_target);
+        isPlaceFree = CheckFreeePOsition(_randomSpawnPosition);
+
+        if (isPlaceFree)
+        {
+            Instantiate(_trash[_randomIndex], _randomSpawnPosition, Quaternion.identity);
+        }
+        else
+        {
+            InstantiateTrash();
+        }
     }
 }

@@ -5,44 +5,58 @@ using UnityEngine.Events;
 
 public class EnemySpawn : MonoBehaviour
 {
-    [SerializeField] private Enemy _enemy;
-    [SerializeField] private int _countEnemy;
-    [SerializeField] private int _miminumRandomNumber;
-    [SerializeField] private int _maximumRandomNumber;
+    [SerializeField] private Transform[] _enemiesSawnPoints;
+    [SerializeField] private AnimationEdit _enemyPrefab;
+    [SerializeField] private Player _playerPrefab;
+    [SerializeField] private Timer _timeSpawn;
 
-    private Vector3 _randomWpawnPositionEnemy;
+    private int _randomIndex;
+    public List<VacuumCleaner> _spawnedEnemies;
 
-    private Enemy _target;
+    public event UnityAction <List<VacuumCleaner>> SomethimgHapped;
+    public event UnityAction ChangeEXP;
 
-    public Enemy TargetEnemy => _target;
-
-    public event UnityAction<Enemy> EnemyCreated;
-
-    private void Update()
+    private void Start()
     {
-        if (_countEnemy > 0)
+        _spawnedEnemies.Add(_playerPrefab);
+
+        for (int i = 0; i < _enemiesSawnPoints.Length; i++)
         {
-            InstantiateEnemy();
-            _countEnemy--;
+            var currentEnemy = Instantiate(_enemyPrefab, _enemiesSawnPoints[i]);
+            currentEnemy.GetComponentInChildren<Enemy>().EnemySpawned += OnEnemySpawned;
+            currentEnemy.GetComponentInChildren<Enemy>().ExperienceTaked += OnExperienceTaked;
+            _spawnedEnemies.Add(currentEnemy.GetComponentInChildren<Enemy>());
         }
     }
 
-    private void InstantiateEnemy()
+    private void OnEnable()
     {
-        _randomWpawnPositionEnemy = new Vector3(Random.Range(-_miminumRandomNumber, _maximumRandomNumber), _enemy.transform.position.y, Random.Range(-_miminumRandomNumber, _maximumRandomNumber));
-        _target=Instantiate(_enemy, _randomWpawnPositionEnemy, Quaternion.identity);
-        EnemyCreated?.Invoke(_target);
-
-
-      //  enemy.Init(_player);
-      //  enemy.EnemyDying += OnEnemyDying;
+        _timeSpawn.TimeSpawnEnemyCame += OnTimeSpawnEnemyCame;
+        _playerPrefab.TotalExperienceTaked += OnExperienceTaked;
+        _playerPrefab.PlayerReady += OnEnemySpawned;
     }
-/*
-    private void OnEnemyDying(Enemy enemy)
+
+    private void OnDisable()
     {
-        enemy.EnemyDying -= OnEnemyDying;
+        _playerPrefab.PlayerReady -= OnEnemySpawned;
+    }
 
-        _player.AddMoney(enemy.Reward);
-    }*/
+    private void OnExperienceTaked()
+    {
+        ChangeEXP?.Invoke();
+    }
+
+    public void OnEnemySpawned(VacuumCleaner vacuumCleaner)
+    {
+        SomethimgHapped?.Invoke(_spawnedEnemies);
+    }
+
+    private void OnTimeSpawnEnemyCame()
+    {
+        _randomIndex = Random.Range(0, _enemiesSawnPoints.Length);
+        var currentEnemy = Instantiate(_enemyPrefab, _enemiesSawnPoints[_randomIndex]);
+        currentEnemy.GetComponentInChildren<Enemy>().EnemySpawned += OnEnemySpawned;
+        currentEnemy.GetComponentInChildren<Enemy>().ExperienceTaked += OnExperienceTaked;
+        _spawnedEnemies.Add(currentEnemy.GetComponentInChildren<Enemy>());
+    }
 }
-
