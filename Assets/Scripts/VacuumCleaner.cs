@@ -8,27 +8,30 @@ using TMPro;
 public abstract class VacuumCleaner : MonoBehaviour
 {
     private const string PickUpObject = "PickUpTrash";
-
+    
+    [SerializeField] Transform _sitForCatPosition;
     [SerializeField] protected int _rewardValue;
-    [SerializeField] protected int _maxExperience;
-    [SerializeField] protected ExperiencePointsText _notificationNewReward;
+    [SerializeField] protected int _maxExperienceForLevel;
     [SerializeField] protected TMP_Text _namePlayerText;
     [SerializeField] protected AnimationEdit _sckaleScript;
+    [SerializeField] protected EcelcticDamage _electricDamage;
+    [SerializeField] protected AudioClip _eatSound;
+    [SerializeField] protected AudioClip _collisionSound;
+    [SerializeField] protected AudioClip _puddleOnSound;
+    [SerializeField] protected AudioSource _audioSource;
 
-    protected int _lostPoint;
-    protected Coroutine _activeCoroutinePuddle;
     protected Animator _animator;
-    protected int _minExperience = 0;
+    protected int _minExperienceForLevel = 0;
     protected int _level = 1;
-    protected int _totalExperience;
-    protected int _receivedReward;
+    protected int _currentExperience;
     protected int _numberNewMaxExperienceAdded = 20;
-    protected int _totalNumberPointsExperience;
+    protected int _totalExperienceForLiderboard;
 
+    public Transform SitForCatPosition => _sitForCatPosition;
     public int Level => _level;
     public int Reward => _rewardValue;
     public string NamePlayer => _namePlayerText.text;
-    public int TotalNumberPointExpirience => _totalNumberPointsExperience;
+    public int TotalExperienceForLiderboard => _totalExperienceForLiderboard;
 
     public abstract void ChangeExerience(int reward);
     public abstract void LostExerience(int lostPoint);
@@ -36,91 +39,18 @@ public abstract class VacuumCleaner : MonoBehaviour
     private void Awake()
     {
         _animator = GetComponent<Animator>();
-        _lostPoint = 0;
-    }
-
-    private void OnTriggerExit(Collider other)
-    {
-        if (other.gameObject.TryGetComponent<Puddle>(out Puddle puddle))
-        {
-            if (_activeCoroutinePuddle != null)
-            {
-                StopCoroutine(_activeCoroutinePuddle);
-            }
-
-            _lostPoint = 0;
-        }
     }
 
     public void TryGetReward(int reward)
     {
-        _totalNumberPointsExperience += reward;
-        _receivedReward = reward;
-        ChangeTotalExperience(_receivedReward);
+        _totalExperienceForLiderboard += reward;
+        _currentExperience += reward;
+        _animator.Play(PickUpObject);
     }
 
     public void TryLostReward(int lostPoint)
     {
-        _totalNumberPointsExperience -= lostPoint;
-        _receivedReward = lostPoint;
-        LostTotalEXP(_receivedReward);
-    }
-
-    private void LostTotalEXP(int lostPoint)
-    {
-        _totalExperience -= lostPoint;
-        TakeLawLevel();
-    }
-
-    private void ChangeTotalExperience(int reward)
-    {
-        _totalExperience += reward;
-        _animator.Play(PickUpObject);
-        TakeNewLevel();
-    }
-
-    private void TakeLawLevel()
-    {
-        if (_totalExperience < _minExperience)
-        {
-            TakeLowLevelText();
-            _maxExperience -= _numberNewMaxExperienceAdded;
-            _level--;
-            _sckaleScript.TakeLooseObjectSize();
-        }
-    }
-
-    private void TakeNewLevel()
-    {
-        if (_totalExperience >= _maxExperience)
-        {
-            TakeNewLevelText();
-            _sckaleScript.TakeNewObjectSize();
-            _totalExperience = _minExperience;
-            _maxExperience += _numberNewMaxExperienceAdded;
-            _level++;
-        }
-    }
-
-    private void TakeLowLevelText()
-    {
-        _notificationNewReward.gameObject.SetActive(true);
-        _notificationNewReward.NotificationLowLevel();
-    }
-
-    private void TakeNewLevelText()
-    {
-        _notificationNewReward.gameObject.SetActive(true);
-        _notificationNewReward.NotificationNextLevel();
-    }
-
-    protected IEnumerator RaseLostPoint()
-    {
-        while (true)
-        {
-            _lostPoint++;
-
-            yield return new WaitForSeconds(0.2f);
-        }
+        _totalExperienceForLiderboard -= lostPoint;
+        _currentExperience -= lostPoint;
     }
 }

@@ -9,10 +9,10 @@ public class FinalRatingView : MonoBehaviour
     [SerializeField] private TMP_Text _playerNameText;
     [SerializeField] private TMP_Text _playerPointText;
 
-    public void RenderFinalView(VacuumCleaner player, int position)
+    public void RenderFinalView(VacuumCleaner player, string position)
     {
-        _playerPositionText.text = position.ToString();
+        _playerPositionText.text = position;
         _playerNameText.text = player.NamePlayer;
-        _playerPointText.text = player.TotalNumberPointExpirience.ToString() + " pts ";
+        _playerPointText.text = player.TotalExperienceForLiderboard.ToString();
     }
 }

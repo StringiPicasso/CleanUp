@@ -8,14 +8,21 @@ public class AnimationEdit : MonoBehaviour
     [SerializeField] private float _timeChangeScale;
 
     private Coroutine _activeCoroutine;
-    private Vector3 _numberNewLocalScaleAdded = new Vector3(0.3f, 0.3f, 0.3f);
+    private Vector3 _numberNewLocalScaleAdded = new Vector3(0.1f, 0.1f, 0.1f);
     private Vector3 _newCountScale;
 
-    public VacuumCleaner PlayerCleaner => vacuumCleaner;
+    public Vector3 ScalePlayer=>transform.localScale;
+    public Vector3 NumberNewLocalScaleAdded => _numberNewLocalScaleAdded;
 
     void Start()
     {
         _newCountScale = transform.localScale;
+    }
+
+    public void TakeScaleValueForEnemy(Vector3 newScaleCount)
+    {
+        _newCountScale =newScaleCount;
+        transform.localScale = _newCountScale;
     }
 
     public void TakeLooseObjectSize()

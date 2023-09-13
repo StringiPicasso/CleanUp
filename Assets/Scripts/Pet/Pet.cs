@@ -6,6 +6,8 @@ using UnityEngine.AI;
 
 public class Pet : MonoBehaviour
 {
+    [SerializeField] private Renderer _material;
+    [SerializeField] private PuddleSpawn _puddleSpawnScript;
     [SerializeField] private NavMeshAgent _movementPet;
     [SerializeField] private float _timeLifePet;
     [SerializeField] private float _timeFreezePlayers;
@@ -14,6 +16,9 @@ public class Pet : MonoBehaviour
     [SerializeField] private float _minimumRandomNumber;
     [SerializeField] private float _maximumRandomNumber;
     [SerializeField] private float _timeSpawnPuddle;
+    [SerializeField] private AudioSource _audioSource;
+    [SerializeField] private AudioClip _spawnPuddle;
+    [SerializeField] private AudioClip _triggerPlayers;
 
     private Coroutine _activeCoroutinePet;
     private VacuumCleaner _targetVacuum;
@@ -31,6 +36,7 @@ public class Pet : MonoBehaviour
         _animatorPet = GetComponent<Animator>();
         _targetVacuum = GetComponent<VacuumCleaner>();
         Destroy(gameObject, _timeLifePet);
+
         _animatorPet.GetBool("IsNeedSitting");
         StartCoroutine(ChangeRandomTarget());
     }
@@ -39,16 +45,18 @@ public class Pet : MonoBehaviour
     {
         if (other.gameObject.TryGetComponent<Enemy>(out Enemy enemy))
         {
+            _audioSource.PlayOneShot(_triggerPlayers);
             EnemyTaked?.Invoke(_timeFreezePlayers);
-            CatchPlayer(enemy.gameObject);
+            CatchPlayer(enemy);
         }
 
         if (other.gameObject.TryGetComponent<Player>(out Player player))
         {
             if (player.IsGearsInStock == false)
             {
+                _audioSource.PlayOneShot(_triggerPlayers);
                 PlayerTaked?.Invoke(_timeFreezePlayers);
-                CatchPlayer(player.gameObject);
+                CatchPlayer(player);
             }
             else
             {
@@ -67,12 +75,24 @@ public class Pet : MonoBehaviour
         }
     }
 
-    public void NewLevelCat(float newLife)
+    public void SoundSpawnPuddle()
+    {
+        _audioSource.PlayOneShot(_spawnPuddle);
+    }
+
+  /*  public void NewLevelCat(float newLife)
     {
         _timeLifePet += newLife;
     }
+  */
+    public void UpgradeStrongCat()
+    {
+        _movementPet.speed++;
+        _material.material.color = Color.gray;
+        _puddleSpawnScript.OnStrongerCatSpawnrd();
+    }
 
-    private void CatchPlayer(GameObject player)
+    private void CatchPlayer(VacuumCleaner player)
     {
         _activeCoroutinePet = StartCoroutine(FreezePlayerCoroutine(player));
     }
@@ -103,11 +123,12 @@ public class Pet : MonoBehaviour
         SelectRandomTarget();
     }
 
-    private IEnumerator FreezePlayerCoroutine(GameObject player)
+    private IEnumerator FreezePlayerCoroutine(VacuumCleaner player)
     {
         GetComponent<PetNavMEsh>().enabled = false;
         _movementPet.enabled = false;
-        _targetPet = player.gameObject.transform.position;
+        _targetPet = player.SitForCatPosition.position;
+        transform.position = player.SitForCatPosition.position;
         _animatorPet.SetBool("IsNeedSitting", true);
         _animatorPet.Play("sit");
 

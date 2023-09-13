@@ -6,32 +6,35 @@ public class GearWheelSpawn : MonoBehaviour
 {
     [SerializeField] private Player _player;
     [SerializeField] private GearWheel _gearWheelPrefab;
-    [SerializeField] private SpawnGearWheelText _gearWheelSpawnText;
+    [SerializeField] private InstantiateSpawnTextCanvas _gearWheelSpawnText;
+    [SerializeField] private GameManagerCanvas _counWheels;
+    [SerializeField] private LocationSize _areaSpawn;
+    [SerializeField] private int _necessaryEXPCountForSpawnWheel;
+    [SerializeField] private int _addedNextEXPCount;
 
     private Vector3 _randomSpawnPosition;
-    private int _necessaryEXPCountForSpawnWheel = 15;
-    private int _addedNextEXPCount = 15;
+
 
     private void OnEnable()
     {
-        _player.ExperienceTakedForCheckBonus += OnExperienceTakedForCheckBonus;
+        _player.TimeToSpawnWheelCame += OnTimeToSpawnWheelCame;
     }
 
     private void OnDisable()
     {
-        _player.ExperienceTakedForCheckBonus -= OnExperienceTakedForCheckBonus;
+        _player.TimeToSpawnWheelCame -= OnTimeToSpawnWheelCame;
     }
 
-    void OnExperienceTakedForCheckBonus()
+    private void OnTimeToSpawnWheelCame()
     {
-        if (_player.TotalNumberPointExpirience >= _necessaryEXPCountForSpawnWheel && _player.CountGearWheel < _gearWheelPrefab.NecessaryCountWheel)
+        if (_player.TotalExperienceForLiderboard >= _necessaryEXPCountForSpawnWheel && _player.CountGearWheel < _counWheels.NecessaryCountWheel)
         {
-            _randomSpawnPosition = new Vector3(Random.Range(-20, 20), _gearWheelPrefab.transform.position.y, Random.Range(-20, 30));
-            Instantiate(_gearWheelPrefab, _randomSpawnPosition, Quaternion.identity);
+            _randomSpawnPosition = _areaSpawn.ChooseRandomSpawnPozitionXZ(_gearWheelPrefab.transform.position.y);
+
+            var wheel=Instantiate(_gearWheelPrefab, _randomSpawnPosition, Quaternion.identity);
             _necessaryEXPCountForSpawnWheel += _addedNextEXPCount;
 
-            _gearWheelSpawnText.gameObject.SetActive(true);
-            _gearWheelSpawnText.GearWheelTextSpawn("Появилась шестеренка");
+            _gearWheelSpawnText.CreateTextOnDisplay("Появилась шестеренка");
         }
     }
 }

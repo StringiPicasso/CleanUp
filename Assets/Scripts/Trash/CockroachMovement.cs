@@ -7,13 +7,13 @@ public class CockroachMovement : MonoBehaviour
     [SerializeField] private float _speed;
     [SerializeField] private float _range;
     [SerializeField] private float _timeToChangeRandomTarget;
-    [SerializeField] private float _minimumRandomNumber;
-    [SerializeField] private float _maximumRandomNumber;
 
     private Vector3 _target;
+    private LocationSize _area;
 
     private void Start()
     {
+        _area=FindObjectOfType<LocationSize>();
         StartCoroutine(ChangeRandomTarget());
     }
 
@@ -29,7 +29,7 @@ public class CockroachMovement : MonoBehaviour
 
     private void SelectRandomTarget()
     {
-        _target = new Vector3(Random.Range(-_minimumRandomNumber, _maximumRandomNumber), 0, Random.Range(-_minimumRandomNumber, _maximumRandomNumber));
+        _target = _area.ChooseRandomSpawnPozitionXZ(0);
     }
 
     private void Move()

@@ -5,10 +5,11 @@ using UnityEngine;
 public class ChangeColorPlayer : MonoBehaviour
 {
     [SerializeField] private Renderer[] _materials;
-    [SerializeField] private StartGameSceen _colorPlayer;
+    [SerializeField] private GameManagerCanvas _colorPlayer;
 
     private void OnEnable()
     {
+        //ChangeColor(_colorPlayer.PlayerColor);
         _colorPlayer.ColorAlready += OnColorAlready;
     }
 

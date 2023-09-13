@@ -2,17 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
-using TMPro;
 using UnityEngine.AI;
 
 public class Enemy : VacuumCleaner
 {
     [SerializeField] private EnemiesNames _changeName;
-    [SerializeField] private TMP_Text _enemyNameText;
     [SerializeField] private NavMeshAgent _movementEnemy;
-    [SerializeField] private SpawnPet _perSpawn;
     [SerializeField] private float _range;
-    
+    [SerializeField] private float _timeToDie;
+
     private Player _playerTarget;
     private Enemy _currentTarget;
     private Vector3 _target;
@@ -20,19 +18,17 @@ public class Enemy : VacuumCleaner
     private Coroutine _activeCoroutineMoveEnemy;
 
     public Vector3 TargetDestination => _target;
-    public float EnemyRange => _range;
     public int LevelEnemy => _level;
 
-    public event UnityAction ExperienceTaked;
-    public event UnityAction EnemyKilled;
+    public event UnityAction<string> ExperienceTaked;
     public event UnityAction<VacuumCleaner> EnemySpawned;
+    public event UnityAction EnemyDied;
 
     private void Start()
     {
-        _perSpawn.PetSpawned += PetSpawnEvent;
-        _enemyNameText.text = _changeName.ChangeName();
+        _namePlayerText.text = _changeName.ChangeName();
         _enemyChangeColor = GetComponent<EnemyChangeColor>();
-        _enemyNameText.color = _enemyChangeColor.EnemyColor;
+        _namePlayerText.color = _enemyChangeColor.EnemyColor;
         _playerTarget = FindObjectOfType<Player>();
         EnemySpawned?.Invoke(this);
     }
@@ -41,24 +37,28 @@ public class Enemy : VacuumCleaner
     {
         if (other.gameObject.TryGetComponent<Trash>(out Trash trash))
         {
+            _audioSource.PlayOneShot(_eatSound);
             ChangeExerience(trash.RewardTrash);
             Destroy(trash.gameObject);
         }
+
         if (other.gameObject.TryGetComponent<Player>(out Player player))
         {
             if (player.Level < _level)
             {
+                _audioSource.PlayOneShot(_eatSound);
                 ChangeExerience(player.Reward);
                 player.PlayerDiedFromEnemy();
             }
         }
+
         if (other.gameObject.TryGetComponent<Enemy>(out Enemy enemy))
         {
             if (enemy.Level < _level)
             {
+                _audioSource.PlayOneShot(_eatSound);
                 ChangeExerience(enemy.Reward);
                 Destroy(enemy.gameObject);
-                EnemyKilled?.Invoke();
             }
         }
 
@@ -69,25 +69,43 @@ public class Enemy : VacuumCleaner
 
         if (other.gameObject.TryGetComponent<Puddle>(out Puddle puddle))
         {
-            _activeCoroutinePuddle = StartCoroutine(RaseLostPoint());
-
-            LostExerience(_lostPoint);
+            _audioSource.PlayOneShot(_puddleOnSound);
+            _electricDamage.enabled = true;
+            LostExerience(puddle.Damage);
         }
     }
     
     public override void ChangeExerience(int reward)
     {
         TryGetReward(reward);
-        ExperienceTaked?.Invoke();
+
+        if (_currentExperience >= _maxExperienceForLevel)
+        {
+            _sckaleScript.TakeNewObjectSize();
+            _currentExperience = _minExperienceForLevel;
+            _maxExperienceForLevel += _numberNewMaxExperienceAdded;
+            _level++;
+        }
+
+        ExperienceTaked?.Invoke(NamePlayer);
     }
     public override void LostExerience(int lostPoint)
     {
         TryLostReward(lostPoint);
-        ExperienceTaked?.Invoke();
 
-        if (_totalNumberPointsExperience < 0)
+        if (_currentExperience < _minExperienceForLevel)
         {
-            Destroy(gameObject);
+            _maxExperienceForLevel -= _numberNewMaxExperienceAdded;
+            _level--;
+            _sckaleScript.TakeLooseObjectSize();
+        }
+
+        ExperienceTaked?.Invoke(NamePlayer);
+
+        if (_totalExperienceForLiderboard <= 0)
+        {
+            EnemyDied?.Invoke();
+            Destroy(gameObject,_timeToDie);
         }
     }
 
@@ -108,10 +126,20 @@ public class Enemy : VacuumCleaner
         }
     }
 
+     public void TakeCharactersForEnemy(int level, int currentExp, Vector3 scale, int maxExpForLevel)
+    {
+        _level=level;
+        _maxExperienceForLevel = maxExpForLevel;
+        _currentExperience = currentExp;
+        _totalExperienceForLiderboard = _currentExperience;
+        _sckaleScript.TakeScaleValueForEnemy(scale);
+    }
+
     private void SelectClosetTrash()
     {
         float distanceToCloseTrash = Mathf.Infinity;
         Trash[] allTrashes = FindObjectsOfType<Trash>();
+
         for (int i = 0; i < allTrashes.Length; i++)
         {
             float distance = Vector3.Distance(transform.position, allTrashes[i].transform.position);
@@ -145,14 +173,7 @@ public class Enemy : VacuumCleaner
         }
     }
 
-    public void PetSpawnEvent(Pet pet)
-    {
-        Debug.Log("Enemy Taked");
-        pet.EnemyTaked += OnEnemyTaked;
-
-    }
-
-    public void OnEnemyTaked(float time)
+/*    public void OnEnemyTaked(float time)
     {
         _activeCoroutineMoveEnemy = StartCoroutine(FreezeMovement(time));
     }
@@ -166,9 +187,9 @@ public class Enemy : VacuumCleaner
 
         _movementEnemy.enabled = true;
 
-        if (_activeCoroutinePuddle != null)
+        if (_activeCoroutineMoveEnemy != null)
         {
             StopCoroutine(_activeCoroutineMoveEnemy);
         }
-    }
+    }*/
 }

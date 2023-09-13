@@ -5,37 +5,59 @@ using UnityEngine.Events;
 
 public class SpawnPet : MonoBehaviour
 {
+    [SerializeField] private Transform[] _pointsSpawnCat;
+    [SerializeField] private TimeToSpawnOrdinaryCat _timeSpawnOrdinaryCat;
     [SerializeField] private Pet _petPrefab;
-    [SerializeField] private SpawnGearWheelText _gearWheelSpawnText;
-    [SerializeField] private Timer _timeSpawn;
-    [SerializeField] private float _newLifeCat;
+    [SerializeField] private InstantiateSpawnTextCanvas _gearWheelSpawnText;
+    [SerializeField] private Puddle _puddlePrefab;
+    [SerializeField] private int _maxDamagePuddle;
+    [SerializeField] private int _minDamagePuddle;
 
-    private Vector3 _randomSpawnPosition;
+    private int _randomSpawnPointIndex;
 
     public event UnityAction<Pet> PetSpawned;
 
     private void OnEnable()
     {
-        _timeSpawn.TimeSpawnPetCame += OnSpawnPet;
+        _timeSpawnOrdinaryCat.TimeSpawnBlackCatCame += OnCatStrongerSpawed;
+        _timeSpawnOrdinaryCat.TimeSpawnPetCame += OnSpawnOrdinaryPet;
     }
 
     private void OnDisable()
     {
-        _timeSpawn.TimeSpawnPetCame -= OnSpawnPet;
+        _timeSpawnOrdinaryCat.TimeSpawnPetCame -= OnSpawnOrdinaryPet;
     }
+
     private void Start()
     {
-        OnSpawnPet();
+        _puddlePrefab.FirstSpawnFromCat(_minDamagePuddle, _maxDamagePuddle);
     }
 
-    void OnSpawnPet()
+    private void OnSpawnOrdinaryPet()
     {
-        _randomSpawnPosition = new Vector3(Random.Range(-20, 20), _petPrefab.transform.position.y, Random.Range(-20, 30));
-        var currentPet = Instantiate(_petPrefab, _randomSpawnPosition, Quaternion.identity);
-        currentPet.NewLevelCat(_newLifeCat);
-        PetSpawned?.Invoke(currentPet);
+        var currentPet = SpawnNewCat();
+       // currentPet.NewLevelCat(_newLifeCat);
+        NotificationForNewCat(currentPet, "В дом зашел кот!");
+    }
 
+    private void OnCatStrongerSpawed()
+    {
+        var currentPet = SpawnNewCat();
+        currentPet.UpgradeStrongCat();
+    }
+
+    private void NotificationForNewCat(Pet currentPet, string textNotification)
+    {
+        PetSpawned?.Invoke(currentPet);
         _gearWheelSpawnText.gameObject.SetActive(true);
-        _gearWheelSpawnText.GearWheelTextSpawn("В дом зашел кот!");
+        _gearWheelSpawnText.CreateTextOnDisplay(textNotification);
+    }
+
+    private Pet SpawnNewCat()
+    {
+        _randomSpawnPointIndex = Random.Range(0, _pointsSpawnCat.Length);
+        var currentPet = Instantiate(_petPrefab, _pointsSpawnCat[_randomSpawnPointIndex]);
+
+        return currentPet;
     }
 }
