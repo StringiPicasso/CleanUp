@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
-using Agava.YandexGames;
 using UnityEngine.SceneManagement;
 
 public class GameManagerCanvas : MonoBehaviour
@@ -15,22 +14,22 @@ public class GameManagerCanvas : MonoBehaviour
     [SerializeField] private Player _player;
     [SerializeField] private Timer _timer;
     [SerializeField] private int _necessaryCountWheel;
+    [SerializeField] private LevelCounNotification _levelNotificationPrefab;
+    [SerializeField] private Transform _levelPrefabPlace;
 
     private int _globalPointPlayer;
-    private int _globalKillPlayer;
+  //  private int _globalKillPlayer;
     private int _firstLevelGame = 1;
     private int _currentLevel;
 
     public int GlobalPointPlayer => _globalPointPlayer;
     public int NecessaryCountWheel => _necessaryCountWheel;
-    public Color PlayerColor => _playerColor;
 
     public event UnityAction WheelCountChanged;
-     public event UnityAction<Color> ColorAlready;
+    public event UnityAction<Color> ColorAlready;
 
     private void OnEnable()
     {
-        CheckLevelData();
 
         _player.PlayerBroked += OnPlayerBroked;
         _player.PlayerAte += OnPlayerAte;
@@ -45,6 +44,15 @@ public class GameManagerCanvas : MonoBehaviour
         _timer.TimeGameFinished -= OnTimeGameFinished;
         _adOpen.WheelsChanged -= OnWheelsChanged;
     }
+
+    private void Start()
+    {
+        CheckLevelData();
+
+        var currentLevelPrefab = Instantiate(_levelNotificationPrefab, _levelPrefabPlace);
+        currentLevelPrefab.LevelCountTextGet(_currentLevel);
+    }
+
     public void NextLevelButton()
     {
         _adOpen.OnShowAd();
@@ -59,26 +67,41 @@ public class GameManagerCanvas : MonoBehaviour
     public void NewGame()
     {
         LoadFirstLevelData();
-        Time.timeScale = 1;
         SceneManager.LoadScene(_currentLevel);
     }
 
     public void SaveColorPlayer(Color color)
     {
+        SaveColor(color, "Color");
         _playerColor = color;
         ColorAlready?.Invoke(_playerColor);
-        Debug.Log(_playerColor);
+    }
+
+    public static void SaveColor(Color color, string key)
+    {
+        PlayerPrefs.SetFloat(key + "R", color.r);
+        PlayerPrefs.SetFloat(key + "G", color.g);
+        PlayerPrefs.SetFloat(key + "B", color.b);
+        PlayerPrefs.SetFloat(key + "A", color.a);
+    }
+
+    public static Color GetSaveColor(string key)
+    {
+        float r = PlayerPrefs.GetFloat(key + "R");
+        float g = PlayerPrefs.GetFloat(key + "G");
+        float b = PlayerPrefs.GetFloat(key + "B");
+        float a = PlayerPrefs.GetFloat(key + "A");
+
+        return new Color(r, g, b, a);
     }
 
     static private void RestartGame()
     {
-        Time.timeScale = 1;
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
     private void NextLevel()
     {
-        Time.timeScale = 1;
         _currentLevel++;
         PlayerPrefs.SetInt("level", _currentLevel);
         SceneManager.LoadScene(_currentLevel);
@@ -95,22 +118,22 @@ public class GameManagerCanvas : MonoBehaviour
         else
         {
             _globalPointPlayer = PlayerPrefs.GetInt("points");
-            _globalKillPlayer = PlayerPrefs.GetInt("kills");
+           // _globalKillPlayer = PlayerPrefs.GetInt("kills");
             _necessaryCountWheel = PlayerPrefs.GetInt("WheelsCount");
+            _playerColor = GetSaveColor("Color");
             ColorAlready?.Invoke(_playerColor);
-
         }
     }
 
     private void LoadFirstLevelData()
     {
-            PlayerPrefs.SetInt("WheelsCount", _necessaryCountWheel);
-            _globalPointPlayer = 0;
-            _globalKillPlayer = 0;
-            _currentLevel = _firstLevelGame;
-            PlayerPrefs.SetInt("points", _globalPointPlayer);
-            PlayerPrefs.SetInt("kills", _globalKillPlayer);
-            PlayerPrefs.SetInt("level", _currentLevel);
+        PlayerPrefs.SetInt("WheelsCount", _necessaryCountWheel);
+        _globalPointPlayer = 0;
+       // _globalKillPlayer = 0;
+        _currentLevel = _firstLevelGame;
+        PlayerPrefs.SetInt("points", _globalPointPlayer);
+      //  PlayerPrefs.SetInt("kills", _globalKillPlayer);
+        PlayerPrefs.SetInt("level", _currentLevel);
     }
 
     private void OnWheelsChanged(int newCount)
@@ -123,9 +146,9 @@ public class GameManagerCanvas : MonoBehaviour
     private void PrefPlayerSave()
     {
         _globalPointPlayer += _player.TotalExperienceForLiderboard;
-        _globalKillPlayer += _player.TotalKillsPlayer;
+       // _globalKillPlayer += _player.TotalKillsPlayer;
         PlayerPrefs.SetInt("points", _globalPointPlayer);
-        PlayerPrefs.SetInt("kills", _globalKillPlayer);
+       // PlayerPrefs.SetInt("kills", _globalKillPlayer);
         PlayerPrefs.Save();
     }
 

@@ -11,15 +11,14 @@ public class GlobalLiderboard : MonoBehaviour
     [SerializeField] private LeaderboardViewRang _templateThirdView;
     [SerializeField] private GameObject _viewPlace;
     [SerializeField] private GameManagerCanvas gameManagerCanvas;
-    [SerializeField] private List<LeaderboardViewRang> _ratingVews=new();
+    [SerializeField] private List<LeaderboardViewRang> _ratingVews;
 
     private readonly string _leadearboardName = "GlobalLeaderboard";
     private readonly string _anonymousName = "Anonymous";
 
-    private void OnEnable()
+    private void Start()
     {
         Time.timeScale = 0;
-        _ratingVews.Clear();
 
         PlayerAccount.Authorize();
 
@@ -32,18 +31,6 @@ public class GlobalLiderboard : MonoBehaviour
         {
             Leaderboard.SetScore(_leadearboardName, gameManagerCanvas.GlobalPointPlayer);
                 ShowAllUsers();
-          /*  Leaderboard.GetPlayerEntry(_leadearboardName, (result) =>
-            {
-            /*    if (result == null)
-                {
-           // ShowAllUsers();
-                }
-                else
-                {
-                    //Leaderboard.SetScore(_leadearboardName, result.score);
-                   // ShowAllUsers();
-                }
-            });*/
         }
         else
         {
@@ -53,8 +40,6 @@ public class GlobalLiderboard : MonoBehaviour
 
     private void ShowAllUsers()
     {
-      //  _ratingVews.Clear();
-
         Leaderboard.GetEntries(_leadearboardName, (result) =>
         {
             for (int i = 0; i < result.entries.Length; i++)
@@ -94,7 +79,6 @@ public class GlobalLiderboard : MonoBehaviour
             _ratingVews.Add(view);
 
         _ratingVews[i].RenderView(entry.rank, name, entry.score);
-          //  _ratingVews..RenderView(entry.rank, name, entry.score);
         }
         
     }

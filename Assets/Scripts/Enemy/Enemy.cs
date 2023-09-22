@@ -15,10 +15,8 @@ public class Enemy : VacuumCleaner
     private Enemy _currentTarget;
     private Vector3 _target;
     private EnemyChangeColor _enemyChangeColor;
-    private Coroutine _activeCoroutineMoveEnemy;
 
     public Vector3 TargetDestination => _target;
-    public int LevelEnemy => _level;
 
     public event UnityAction<string> ExperienceTaked;
     public event UnityAction<VacuumCleaner> EnemySpawned;
@@ -74,7 +72,7 @@ public class Enemy : VacuumCleaner
             LostExerience(puddle.Damage);
         }
     }
-    
+
     public override void ChangeExerience(int reward)
     {
         TryGetReward(reward);
@@ -89,6 +87,7 @@ public class Enemy : VacuumCleaner
 
         ExperienceTaked?.Invoke(NamePlayer);
     }
+
     public override void LostExerience(int lostPoint)
     {
         TryLostReward(lostPoint);
@@ -105,7 +104,7 @@ public class Enemy : VacuumCleaner
         if (_totalExperienceForLiderboard <= 0)
         {
             EnemyDied?.Invoke();
-            Destroy(gameObject,_timeToDie);
+            Destroy(gameObject, _timeToDie);
         }
     }
 
@@ -117,18 +116,18 @@ public class Enemy : VacuumCleaner
     private void SelectTarget()
     {
         if (Vector3.Distance(transform.position, _playerTarget.transform.position) < _range && _playerTarget.Level < _level)
-         {
-         _target = _playerTarget.gameObject.transform.position;
-         }
+        {
+            _target = _playerTarget.gameObject.transform.position;
+        }
         else
         {
             CheckWeekEnemy();
         }
     }
 
-     public void TakeCharactersForEnemy(int level, int currentExp, Vector3 scale, int maxExpForLevel)
+    public void TakeCharactersForEnemy(int level, int currentExp, Vector3 scale, int maxExpForLevel)
     {
-        _level=level;
+        _level = level;
         _maxExperienceForLevel = maxExpForLevel;
         _currentExperience = currentExp;
         _totalExperienceForLiderboard = _currentExperience;
@@ -172,24 +171,4 @@ public class Enemy : VacuumCleaner
             SelectClosetTrash();
         }
     }
-
-/*    public void OnEnemyTaked(float time)
-    {
-        _activeCoroutineMoveEnemy = StartCoroutine(FreezeMovement(time));
-    }
-
-    private IEnumerator FreezeMovement(float time)
-    {
-        GetComponent<EnemyNaMesh>().enabled = false;
-        _movementEnemy.enabled = false;
-
-        yield return new WaitForSeconds(time);
-
-        _movementEnemy.enabled = true;
-
-        if (_activeCoroutineMoveEnemy != null)
-        {
-            StopCoroutine(_activeCoroutineMoveEnemy);
-        }
-    }*/
 }

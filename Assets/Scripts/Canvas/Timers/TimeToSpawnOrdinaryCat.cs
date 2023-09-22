@@ -22,18 +22,13 @@ public class TimeToSpawnOrdinaryCat : TimeToSpawn
 
         if (_currentTimeLevelUpSpawnEnemies <= 0)
         {
+            _currentTimeLevelUpSpawnEnemies = _timeLevelUpSpawnEnemies;
             TimeSpawnBlackCatCame?.Invoke();
-            ComputationTimeToLevelUp("В дом зашел Черный кот!\nКоты стали умнее!");
         }
     }
 
     public override void ComputationTimeToSpawn()
     {
         _currentSpawnTime = CountDownTimeToSpawn();
-    }
-
-    public override void ComputationTimeToLevelUp(string text)
-    {
-        _currentTimeLevelUpSpawnEnemies = CountDownToLevelUp(text);
     }
 }

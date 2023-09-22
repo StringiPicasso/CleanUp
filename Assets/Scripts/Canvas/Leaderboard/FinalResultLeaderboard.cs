@@ -14,20 +14,21 @@ public class FinalResultLeaderboard : MonoBehaviour
 
     private bool IsPlayerOffRating;
 
-    private void Awake()
-    {
-        IsPlayerOffRating = false;
 
-        for (int i = 0; i < _resultsPlayers._playersResultLeaderboard.Count; i++)
-        {
-            if (_resultsPlayers._playersResultLeaderboard[i].TotalExperienceForLiderboard > 0)
-            {
-                _finalGameLeaderboard.Add(_resultsPlayers._playersResultLeaderboard[i]);
-            }
-        }
-    }
+     private void Awake()
+     {
+         IsPlayerOffRating = false;
 
-    private void OnEnable()
+         for (int i = 0; i < _resultsPlayers._playersResultLeaderboard.Count; i++)
+         {
+             if (_resultsPlayers._playersResultLeaderboard[i].TotalExperienceForLiderboard > 0)
+             {
+                 _finalGameLeaderboard.Add(_resultsPlayers._playersResultLeaderboard[i]);
+             }
+         }
+     }
+ 
+    private void Start()
     {
         _finalGameLeaderboard.Sort((p1, p2) => p2.TotalExperienceForLiderboard.CompareTo(p1.TotalExperienceForLiderboard));
 

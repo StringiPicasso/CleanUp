@@ -1,11 +1,11 @@
 {
   "dependencies": {
     "com.agava.yandexgames": {
-      "version": "https://github.com/forcepusher/com.agava.yandexgames.git#11.2.1",
+      "version": "https://github.com/forcepusher/com.agava.yandexgames.git#13.1.0",
       "depth": 0,
       "source": "git",
       "dependencies": {},
-      "hash": "93cd4254e13830886ba1c2b3054481844372140c"
+      "hash": "cb14e237b043f308cd827e2c320c1be19dfa4d87"
     },
     "com.unity.burst": {
       "version": "1.6.6",

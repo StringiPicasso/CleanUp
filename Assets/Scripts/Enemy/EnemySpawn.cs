@@ -12,14 +12,11 @@ public class EnemySpawn : MonoBehaviour
 
     public List<VacuumCleaner> _spawnedEnemies;
 
-    private int _currentLevel;
-    private int _currentCurrentExperience;
-    private Vector3 _currentScale;
-    private int _currentMaxExerienceForLevel;
     private int _randomIndex;
 
     public event UnityAction<List<VacuumCleaner>> SomethimgHapped;
     public event UnityAction<string> ChangeEXP;
+    public event UnityAction SomeEnemyDied;
 
     private void Start()
     {
@@ -59,17 +56,13 @@ public class EnemySpawn : MonoBehaviour
 
     private void OnTimeSpawnEnemyCame(int level, int currentExp, Vector3 scale, int maxExpForLevel)
     {
-        _currentLevel = level;
-        _currentCurrentExperience = currentExp;
-        _currentScale = scale;
-        _currentMaxExerienceForLevel = maxExpForLevel;
         _randomIndex = Random.Range(0, _enemiesSawnPoints.Length);
-        OnTimeToSpawnEnemyCame();
+        SpawnEnemy(_randomIndex, level, currentExp, scale, maxExpForLevel);
     }
 
     private void OnTimeToSpawnEnemyCame()
     {
-        SpawnEnemy(_randomIndex, _currentLevel, _currentCurrentExperience, _currentScale, _currentMaxExerienceForLevel);
+        SomeEnemyDied?.Invoke();
     }
 
     private void SpawnEnemy(int index, int level, int currentExp, Vector3 scale, int maxExpForLevel)

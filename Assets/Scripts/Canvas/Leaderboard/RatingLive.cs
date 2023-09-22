@@ -9,7 +9,9 @@ public class RatingLive : MonoBehaviour
     [SerializeField] private List<RatingLiveView> _ratingVews;
     [SerializeField] private EnemySpawn _enemySpawn;
 
+    private List<VacuumCleaner> _finalLeader;
     public List<VacuumCleaner> _playersResultLeaderboard;
+
     private int _top3CountRaiting = 3;
     
     private void OnEnable()

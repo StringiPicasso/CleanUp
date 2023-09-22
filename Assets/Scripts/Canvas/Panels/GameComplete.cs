@@ -4,7 +4,6 @@ using UnityEngine;
 using UnityEngine.Events;
 using TMPro;
 using Agava.YandexGames;
-using UnityEngine.UI;
 
 public class GameComplete : MonoBehaviour
 {

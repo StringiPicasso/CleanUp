@@ -16,6 +16,7 @@ public class Timer : MonoBehaviour
         if (_timeGame <= 0)
         {
             TimeGameFinished?.Invoke();
+            GetComponent<Timer>().enabled = false;
         }
         else
         {
